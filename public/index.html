@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Money Tracking App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+    <style>
+        p {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+ 
+        }
+
+ 
+        .alcoholInfo {
+            font-size: 0, 5em;
+            text-align: center;
+ 
+        }
+ 
+        h1 {
+            text-align: center;
+            font-family: "Arial Black", Gadget, sans-serif;
+
+        }
+ 
+        button {
+            color: white;
+            background: blue;
+        }
+ 
+        #images,
+        #alcoholQuestion {
+            display: inline-block;
+        }
+ 
+        #images {
+            float: right;
+        }
+        body {
+  background: #555;
+}
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #4CAF50; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #4CAF50; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+.content {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 10px;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 23px;
+  height: 24px;
+  border: 0;
+  background: url('contrasticon.png');
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 23px;
+  height: 25px;
+  border: 0;
+  background: url('contrasticon.png');
+  cursor: pointer;
+}
+        
+ 
+    </style>
+</head>
+ 
+<body onload="chartIt()">
+    <div class="content">
+    <h1>How much money do you spend?</h1><br>
+ 
+    
+    <div id='sliderContainer'>
+        <p><label for="money">How much £ did you spent?</label> <br>
+            <input type="range" id="money" min="1" max="200" value="0" oninput="sliderChange(this.value)">
+            <output id="sliderVal"> </output>
+            <hr>
+            <p id="alcoholQuestion"><label for="alcohol">How many alcohol units did you have?</label>
+                <div id="images"></div>
+            </p>
+ 
+            <br>
+ 
+            <input type="range" id="alcohol" min="1" max="20" value="0" oninput="sliderChange1(this.value)">
+            <output id="sliderVal1"> </output>
+            <select id="selectProduct">
+                <option>Thatchers Gold</option>
+                <option>Amstel</option>
+            </select>
+           
+            <hr>
+ 
+            <p><label for="eatingOut">How many times did you eat out?</label> <br>
+                <input type="slider" id="eatingOut" min="1" max="5" value="0" oninput="sliderChange2(this.value)">
+                <output id="sliderVal2"> </output>
+                <hr>
+ 
+ 
+                <button id="submit">submit</button>
+                <br>
+                <br>
+            </p>
+    </div>
+ 
+ 
+ 
+    <p id="container">
+    </p>
+ 
+    <p>
+        <canvas id="chart" width="428" height="214" class="chartjs-render-monitor"></canvas>
+    </p>
+ 
+ 
+    <script>
+        function sliderChange(val) { //
+            document.getElementById('sliderVal').innerHTML = val; //getting the data from the slider 
+        }
+ 
+        function sliderChange1(val) {
+            document.getElementById('sliderVal1').innerHTML = val; //getting the data from the slider 
+        }
+ 
+        function sliderChange2(val) {
+            document.getElementById('sliderVal2').innerHTML = val; //getting the data from the slider 
+        }
+ 
+        const buttonSubmit = document.getElementById('submit'); //listening to the submit button
+        buttonSubmit.addEventListener('click', async event => {
+
+            let response = await fetch('/api'); //getting the elements from the database
+            let dataStuff = await response.json(); //calling json for the database
+            let stuffLenght = dataStuff.length;
+            let lastTime = dataStuff[stuffLenght-1];
+            let nextTime = dataStuff[stuffLenght-1] + 5184000000;
+            if (lastTime>=nextTime) {
+            console.log("Uploaded");
+            const money = document.getElementById('money').value; //getting the element from the money
+            const alcohol = document.getElementById('alcohol').value; //getting the element from the alcohol
+            const eatingOut = document.getElementById('eatingOut').value; //getting the element from the eatingOut
+ 
+            const data = {
+                money,
+                alcohol,
+                eatingOut
+            }; //getting the data for money,alcohol,eatingout
+            const options = { //accesing json
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            };
+
+            }else{
+                console.log("Uploaded already");
+            }
+ 
+            let selectProduct = document.getElementById('selectProduct'); //select the product from the external api
+            let product = selectProduct.options[selectProduct.selectedIndex].value;
+ 
+            const response1 = await fetch('https://public.opendatasoft.com/api/records/1.0/search/?dataset=units-of-alcohol&facet=brand&facet=category&facet=style&facet=package&refine.product=' + product); //getting the external api
+ 
+            const json1 = await response1.json(); //calling json for the external api
+            console.log(JSON.stringify(json1));
+ 
+            var container = document.getElementById('container');
+            container.innerHTML = "";
+            let fields = json1['records'][0]['fields']; //checking the fields from the external api
+            let units = fields['units_o_alcohol'] * alcohol; //checking the alcohol units from the external api
+            for (let x = 0; x < Math.round(units); x++) { //rounding up the units for the drinks 
+                document.getElementById("images").innerHTML += "<img src='beer.png'>"; //diplay the beer image depending on how much unit you drink
+            }
+ 
+            container.innerHTML += "<br>";
+ 
+            chartIt(); // calling the chart function
+        });
+ 
+        // Task 01
+        async function chartIt() { //creating the chart function
+ 
+            const response = await fetch('/api'); //getting the elements from the database
+            const dataStuff = await response.json(); //calling json for the database
+ 
+ 
+            var habits = { //creates an array for the money,alcohol,eatingout
+                money: [],
+                alcohol: [],
+                eatingOut: []
+            };
+ 
+            let xVals = []; //array for the x axes
+            let yVals = []; //array for the y axes
+ 
+            for (let i = 0; i < dataStuff.length; i++) {
+                xVals[i] = new Date(dataStuff[i].timestamp).toLocaleString(); //
+                habits.money[i] = dataStuff[i].money;
+                habits.alcohol[i] = dataStuff[i].alcohol;
+                habits.eatingOut[i] = dataStuff[i].eatingOut;
+            }
+ 
+ 
+            var chartData = { //creating the line on the chart by the money
+                labels: xVals,
+                datasets: [{
+                    type: 'line',
+                    label: 'Money',
+                    borderColor: "blue",
+                    borderWidth: 3,
+                    fill: false,
+                    data: habits.money
+
+                }, { //creating the bar on the chart by the alcohol
+                    type: 'bar',
+                    label: 'Alcohol',
+                    backgroundColor: "red",
+                    data: habits.alcohol,
+                    borderColor: 'white',
+                    borderWidth: 2
+                }, { //creating the bar on the chart by the eating out
+                    type: 'bar',
+                    label: 'Eating out',
+                    backgroundColor: "green",
+                    data: habits.eatingOut
+                }]
+            };
+ 
+            const ctx = document.getElementById('chart').getContext('2d'); //creates the chart on the screen
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'My spending habits'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: true
+                    }
+                }
+            });
+ 
+ 
+        }
+ 
+    </script>
+     <div class="content">
+</body>
+ 
+</html>
